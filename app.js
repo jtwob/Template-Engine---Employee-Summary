@@ -10,101 +10,112 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-const roles = ["Manager", "Engineer", "Intern"];
+const roles = ["Engineer", "Intern"];
 
 let employees = [];
+
+let managerInquiry = function () {
+    inquirer
+        .prompt([
+            {
+                name: "name",
+                message: "Enter manager's first name: ",
+            },
+            {
+                name: "email",
+                message: "Please enter manager's email: ",
+            },
+            {
+                name: "office",
+                message: "Enter manager's office number: "
+            },
+        ])
+        .then(answers => {
+            let manager = new Manager(answers.name, employees.length + 1, answers.email, answers.office);
+            employees.push(manager);
+            addEmployees();
+        })
+}
 
 let dataGather = function () {
     inquirer
         .prompt([
             {
                 name: "name",
-                message: "Enter your first name: ",
+                message: "Enter employee's first name: ",
             },
             {
                 name: "email",
-                message: "Please enter your email: ",
+                message: "Please enter employee's email: ",
             },
             {
                 type: 'list',
                 name: "role",
-                message: "Select your position: ",
+                message: "Select employee's position: ",
                 choices: roles,
             },
         ])
         .then(answers => {
             switch (answers.role) {
-                case "Manager":
-                    employees.push(managerQs(answers));
-                    break;
                 case "Engineer":
-                    employees.push(engineerQs(answers));
+                    inquirer
+                        .prompt([
+                            {
+                                name: "github",
+                                message: "Enter employee's github username: "
+                            },
+                        ])
+                        .then(answers2 => {
+                            let engineer = new Engineer(answers.name, employees.length + 1, answers.email, answers2.github);
+                            employees.push(engineer);
+                            addEmployees();
+                        })
                     break;
+
                 case "Intern":
-                    employees.push(internQs(answers));
+                    inquirer
+                        .prompt([
+                            {
+                                name: "school",
+                                message: "Enter the name of employee's school: "
+                            },
+                        ])
+                        .then(answers2 => {
+                            let intern = new Intern(answers.name, employees.length + 1, answers.email, answers2.school);
+                            employees.push(intern);
+                            addEmployees();
+                        })
+                    break;
             }
         })
 }
 
-let managerQs = function (data) {
-    let temp = new Manager();
-    temp.setName(data.name);
-    temp.setEmail(data.email);
-    temp.setRole(data.role);
+let makeHTML = function () {
+    fs.writeFile(outputPath, render(employees), (err) => {
+        if (err) throw err;
+    });
+}
 
+const addEmployees = function () {
     inquirer
         .prompt([
             {
-                name: "office",
-                message: "Enter your office number: "
-            },
+                type: "confirm",
+                name: 'add',
+                message: "Would you like to add another employee?"
+            }
         ])
         .then(answers => {
-            temp.setOffice(answers.office);
+            if (answers.add) {
+                dataGather();
+            } else {
+                makeHTML();
+            }
         })
-    return temp;
 }
 
-let engineerQs = function (data) {
-    let temp = new Engineer();
-    temp.setName(data.name);
-    temp.setEmail(data.email);
-    temp.setRole(data.role);
+managerInquiry();
 
-    inquirer
-        .prompt([
-            {
-                name: "github",
-                message: "Enter your github username: "
-            },
-        ])
-        .then(answers => {
-            temp.setGithub(answers.github);
-        })
-    return temp;
-}
-
-let internQs = function (data) {
-    let temp = new Intern();
-    temp.setName(data.name);
-    temp.setEmail(data.email);
-    temp.setRole(data.role);
-
-    inquirer
-        .prompt([
-            {
-                name: "school",
-                message: "Enter the name of your school: "
-            },
-        ])
-        .then(answers => {
-            temp.setSchool(answers.school);
-        })
-    return temp;
-}
-
-dataGather();
-render(employees);
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
