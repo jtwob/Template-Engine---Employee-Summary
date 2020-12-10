@@ -10,6 +10,100 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const roles = ["Manager", "Engineer", "Intern"];
+
+let employees = [];
+
+let dataGather = function () {
+    inquirer
+        .prompt([
+            {
+                name: "name",
+                message: "Enter your first name: ",
+            },
+            {
+                name: "email",
+                message: "Please enter your email: ",
+            },
+            {
+                type: 'list',
+                name: "role",
+                message: "Select your position: ",
+                choices: roles,
+            },
+        ])
+        .then(answers => {
+            switch (answers.role) {
+                case "Manager":
+                    employees.push(managerQs(answers));
+                    break;
+                case "Engineer":
+                    employees.push(engineerQs(answers));
+                    break;
+                case "Intern":
+                    employees.push(internQs(answers));
+            }
+        })
+}
+
+let managerQs = function (data) {
+    let temp = new Manager();
+    temp.setName(data.name);
+    temp.setEmail(data.email);
+    temp.setRole(data.role);
+
+    inquirer
+        .prompt([
+            {
+                name: "office",
+                message: "Enter your office number: "
+            },
+        ])
+        .then(answers => {
+            temp.setOffice(answers.office);
+        })
+    return temp;
+}
+
+let engineerQs = function (data) {
+    let temp = new Engineer();
+    temp.setName(data.name);
+    temp.setEmail(data.email);
+    temp.setRole(data.role);
+
+    inquirer
+        .prompt([
+            {
+                name: "github",
+                message: "Enter your github username: "
+            },
+        ])
+        .then(answers => {
+            temp.setGithub(answers.github);
+        })
+    return temp;
+}
+
+let internQs = function (data) {
+    let temp = new Intern();
+    temp.setName(data.name);
+    temp.setEmail(data.email);
+    temp.setRole(data.role);
+
+    inquirer
+        .prompt([
+            {
+                name: "school",
+                message: "Enter the name of your school: "
+            },
+        ])
+        .then(answers => {
+            temp.setSchool(answers.school);
+        })
+    return temp;
+}
+
+dataGather();
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
